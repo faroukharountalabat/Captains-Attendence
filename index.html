@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#0f0f0f"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<title>Talabat Attendance</title>
+<link rel="manifest" href="manifest.json"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --orange: #FF5A1F;
+  --orange-dark: #D94410;
+  --orange-light: #FF8C5A;
+  --orange-faint: rgba(255,90,31,0.08);
+  --bg: #0A0A0A;
+  --bg2: #141414;
+  --bg3: #1C1C1C;
+  --bg4: #242424;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #F0EDE8;
+  --text2: #9C9890;
+  --text3: #5C5A56;
+  --green: #22C55E;
+  --green-bg: rgba(34,197,94,0.1);
+  --amber: #F59E0B;
+  --amber-bg: rgba(245,158,11,0.1);
+  --red: #EF4444;
+  --red-bg: rgba(239,68,68,0.1);
+  --blue: #3B82F6;
+  --blue-bg: rgba(59,130,246,0.1);
+  --purple: #A78BFA;
+  --purple-bg: rgba(167,139,250,0.1);
+  --r: 10px;
+  --r-sm: 6px;
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;line-height:1.5;overflow:hidden}
+#app{height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+/* ---- NAV ---- */
+.nav{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0}
+.nav-logo{font-family:var(--font-head);font-size:17px;font-weight:800;letter-spacing:-0.03em;display:flex;align-items:center;gap:8px}
+.logo-icon{width:28px;height:28px;background:var(--orange);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff}
+.nav-mode{display:flex;background:var(--bg3);border-radius:8px;padding:3px;gap:2px}
+.nav-mode button{padding:5px 12px;border-radius:6px;font-size:12px;font-family:var(--font-body);font-weight:500;border:none;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s}
+.nav-mode button.active{background:var(--orange);color:#fff}
+
+/* ---- TABS ---- */
+.tabs{display:flex;gap:2px;padding:10px 14px 0;background:var(--bg);flex-shrink:0}
+.tab{padding:8px 14px;font-size:13px;font-family:var(--font-body);font-weight:500;border:none;cursor:pointer;background:transparent;color:var(--text3);border-radius:var(--r-sm) var(--r-sm) 0 0;border-bottom:2px solid transparent;transition:all .15s}
+.tab.active{color:var(--orange);border-bottom-color:var(--orange);background:var(--bg2)}
+
+/* ---- SCROLL AREA ---- */
+.content{flex:1;overflow-y:auto;padding:14px;background:var(--bg2)}
+.screen{display:none}.screen.active{display:block}
+
+/* ---- CARDS ---- */
+.card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.card-title{font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px}
+
+/* ---- STAT GRID ---- */
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.stat{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+.stat-n{font-family:var(--font-head);font-size:30px;font-weight:800;line-height:1}
+.stat-l{font-size:12px;color:var(--text2);margin-top:4px}
+.n-green{color:var(--green)}.n-amber{color:var(--amber)}.n-red{color:var(--red)}.n-gray{color:var(--text3)}
+
+/* ---- BADGES ---- */
+.badge{display:inline-flex;align-items:center;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.b-green{background:var(--green-bg);color:var(--green)}
+.b-amber{background:var(--amber-bg);color:var(--amber)}
+.b-red{background:var(--red-bg);color:var(--red)}
+.b-gray{background:rgba(255,255,255,0.06);color:var(--text2)}
+.b-blue{background:var(--blue-bg);color:var(--blue)}
+.b-purple{background:var(--purple-bg);color:var(--purple)}
+.b-orange{background:var(--orange-faint);color:var(--orange-light)}
+
+/* ---- RIDER LIST ---- */
+.rider-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.rider-row:last-child{border-bottom:none}
+.av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;font-family:var(--font-head)}
+.av-m{background:rgba(167,139,250,0.15);color:var(--purple)}
+.av-n{background:rgba(59,130,246,0.15);color:var(--blue)}
+.r-info{flex:1;min-width:0}
+.r-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r-meta{font-size:11px;color:var(--text3);margin-top:1px}
+.r-right{text-align:right;flex-shrink:0}
+.r-time{font-size:12px;font-weight:500;margin-top:3px;color:var(--text2)}
+
+/* ---- FILTERS ---- */
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.filter-btn{padding:5px 12px;font-size:12px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-family:var(--font-body);transition:all .15s}
+.filter-btn.active{background:var(--orange);border-color:var(--orange);color:#fff}
+
+/* ---- FORMS ---- */
+.form-group{margin-bottom:14px}
+.form-label{font-size:12px;color:var(--text2);margin-bottom:6px;display:block;font-weight:500}
+.form-label span{color:var(--text3);font-weight:400}
+input[type=text],input[type=password],select,textarea{width:100%;padding:10px 12px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r-sm);font-size:14px;font-family:var(--font-body);color:var(--text);outline:none;transition:border .15s;-webkit-appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--orange)}
+select option{background:var(--bg4)}
+
+/* ---- BUTTONS ---- */
+.btn{padding:11px 20px;border-radius:var(--r-sm);font-size:14px;font-family:var(--font-body);font-weight:500;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text);transition:all .15s;width:100%}
+.btn:hover{background:var(--bg4)}
+.btn-primary{background:var(--orange);border-color:var(--orange);color:#fff}
+.btn-primary:hover{background:var(--orange-dark);border-color:var(--orange-dark)}
+.btn-sm{padding:6px 12px;font-size:12px;width:auto}
+.btn-icon{padding:7px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg4);cursor:pointer;color:var(--text2);display:flex;align-items:center}
+
+/* ---- ALERTS ---- */
+.alert{border-radius:var(--r-sm);padding:10px 12px;font-size:13px;display:flex;align-items:flex-start;gap:8px;margin-top:8px}
+.alert-success{background:var(--green-bg);color:var(--green)}
+.alert-warn{background:var(--amber-bg);color:var(--amber)}
+.alert-error{background:var(--red-bg);color:var(--red)}
+.alert-info{background:var(--blue-bg);color:var(--blue)}
+
+/* ---- GPS BOX ---- */
+.gps-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}
+.gps-item{background:var(--bg4);border-radius:var(--r-sm);padding:8px 10px}
+.gps-item-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px}
+.gps-item-val{font-size:12px;font-weight:500}
+
+/* ---- PHOTO ---- */
+.photo-zone{width:100%;height:150px;background:var(--bg4);border:1px dashed var(--border2);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative}
+.photo-zone img{width:100%;height:100%;object-fit:cover;border-radius:var(--r)}
+.photo-zone-label{font-size:12px;color:var(--text3);margin-top:6px}
+
+/* ---- SCHEDULE TABLE ---- */
+.sched-wrapper{overflow-x:auto}
+.sched-table{min-width:560px;border-collapse:collapse;width:100%}
+.sched-table th{font-size:11px;font-weight:600;color:var(--text3);padding:6px 4px;text-align:center;white-space:nowrap;font-family:var(--font-head);letter-spacing:0.04em}
+.sched-table td{padding:4px 3px;vertical-align:middle}
+.sched-table td:first-child{font-size:12px;font-weight:500;white-space:nowrap;padding-right:8px;min-width:90px}
+.day-cell-select{width:100%;font-size:11px;padding:3px 4px;background:var(--bg4);border:1px solid var(--border);border-radius:5px;color:var(--text);cursor:pointer;-webkit-appearance:none}
+.today-col{background:rgba(255,90,31,0.05)}
+
+/* ---- PROGRESS BAR ---- */
+.prog-bar{height:3px;background:var(--bg4);border-radius:2px;overflow:hidden;margin:8px 0 4px}
+.prog-fill{height:100%;background:var(--orange);border-radius:2px;transition:width .5s}
+
+/* ---- LIVE DOT ---- */
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 1.8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* ---- SETUP SCREEN ---- */
+.setup-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:10px}
+.setup-step{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px}
+.step-num{width:26px;height:26px;border-radius:50%;background:var(--orange);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font-head)}
+.step-body{flex:1}
+.step-title{font-size:14px;font-weight:500;margin-bottom:4px}
+.step-desc{font-size:12px;color:var(--text2);line-height:1.6}
+code{background:var(--bg4);padding:2px 6px;border-radius:4px;font-size:12px;color:var(--orange-light);font-family:monospace}
+
+/* ---- LOGIN ---- */
+.login-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:var(--bg)}
+.login-logo{font-family:var(--font-head);font-size:28px;font-weight:800;letter-spacing:-0.04em;margin-bottom:6px}
+.login-logo span{color:var(--orange)}
+.login-sub{font-size:13px;color:var(--text2);margin-bottom:32px}
+.login-card{width:100%;max-width:340px;background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:24px}
+
+/* ---- CONFLICT ITEM ---- */
+.conflict-item{display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--bg4);border-radius:var(--r-sm);margin-bottom:6px}
+
+/* ---- SCROLLBAR ---- */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen" class="login-wrap">
+  <div class="login-logo">talabat <span>attendance</span></div>
+  <div class="login-sub">حضور الكابتن — Captain Attendance Portal</div>
+  <div class="login-card">
+    <div class="form-group">
+      <label class="form-label">Employee ID or Email / رقم الموظف أو الإيميل</label>
+      <input type="text" id="login-id" placeholder="e.g. 10234 or ahmed@talabat.com" autocomplete="username" autocapitalize="none"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password / كلمة المرور</label>
+      <input type="password" id="login-pass" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <button class="btn btn-primary" onclick="doLogin()" style="margin-top:4px">Sign in / دخول →</button>
+    <div id="login-msg"></div>
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);text-align:center">
+      Contact your coordinator to get access
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none">
+
+  <!-- NAV -->
+  <div class="nav">
+    <div class="nav-logo">
+      <div class="logo-icon">T</div>
+      <span id="nav-title">Dashboard</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="live-dot" id="live-dot" style="display:none"></span>
+      <div class="nav-mode" id="mode-switcher" style="display:none">
+        <button id="mode-coord" class="active" onclick="setMode('coordinator')">Coord</button>
+        <button id="mode-captain" onclick="setMode('captain')">Captain</button>
+      </div>
+      <button class="btn-icon" onclick="logout()" title="Log out" style="font-size:13px">✕</button>
+    </div>
+  </div>
+
+  <!-- COORDINATOR VIEW -->
+  <div id="coord-view">
+    <div class="tabs">
+      <button class="tab active" onclick="switchCoordTab('dashboard',this)">Dashboard</button>
+      <button class="tab" onclick="switchCoordTab('schedule',this)">Schedule</button>
+      <button class="tab" onclick="switchCoordTab('captains',this)">Captains</button>
+      <button class="tab" onclick="switchCoordTab('conflicts',this)">Conflicts</button>
+      <button class="tab" onclick="switchCoordTab('users',this)">Users</button>
+      <button class="tab" onclick="switchCoordTab('setup',this)">Setup</button>
+    </div>
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div id="ct-dashboard" class="screen active">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div style="font-size:12px;color:var(--text2)" id="today-label">Today</div>
+          <button class="btn btn-sm" onclick="loadAttendance()" style="width:auto;font-size:12px">↻ Refresh</button>
+        </div>
+        <div class="stat-grid">
+          <div class="stat"><div class="stat-n n-green" id="s-present">—</div><div class="stat-l">Present</div></div>
+          <div class="stat"><div class="stat-n n-amber" id="s-late">—</div><div class="stat-l">Late</div></div>
+          <div class="stat"><div class="stat-n n-red" id="s-absent">—</div><div class="stat-l">Absent</div></div>
+          <div class="stat"><div class="stat-n n-gray" id="s-off">—</div><div class="stat-l">Day off</div></div>
+        </div>
+        <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:14px" id="prog-label">Loading...</div>
+        <div class="filters">
+          <button class="filter-btn active" onclick="filterList('all',this)">All</button>
+          <button class="filter-btn" onclick="filterList('on-time',this)">On time</button>
+          <button class="filter-btn" onclick="filterList('late',this)">Late</button>
+          <button class="filter-btn" onclick="filterList('absent',this)">Absent</button>
+          <button class="filter-btn" onclick="filterList('off',this)">Day off</button>
+        </div>
+        <div class="card" style="padding:4px 14px">
+          <div id="rider-list"><div style="padding:20px;text-align:center;color:var(--text3);font-size:13px">Loading captains...</div></div>
+        </div>
+      </div>
+
+      <!-- SCHEDULE EDITOR -->
+      <div id="ct-schedule" class="screen">
+        <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
+          <select id="week-picker" onchange="loadSchedule()" style="flex:1;font-size:13px">
+          </select>
+          <button class="btn btn-sm btn-primary" onclick="saveSchedule()" style="white-space:nowrap">Save all</button>
+        </div>
+        <div id="assign-panel" class="card">
+          <div class="card-title">Assign / reassign captain</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="form-group" style="margin-bottom:8px">
+              <label class="form-label">Captain</label>
+              <select id="as-rider" style="font-size:13px"></select>
+            </div>
+            <div class="form-group" style="margin-bottom:8px">
+              <label class="form-label">Day</label>
+              <select id="as-day" style="font-size:13px">
+                <option value="0">Sunday</option><option value="1">Monday</option>
+                <option value="2">Tuesday</option><option value="3">Wednesday</option>
+                <option value="4">Thursday</option><option value="5">Friday</option>
+                <option value="6">Saturday</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:8px">
+              <label class="form-label">Shift</label>
+              <select id="as-shift" style="font-size:13px">
+                <option value="morning">Morning (9 AM)</option>
+                <option value="morning8">Morning early (8 AM)</option>
+                <option value="night">Night (4 PM)</option>
+                <option value="cover">Cover (12–12)</option>
+                <option value="off">Day off</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:8px">
+              <label class="form-label">Zone <span>(optional)</span></label>
+              <select id="as-zone" style="font-size:13px">
+                <option value="">Home zone</option>
+                <option value="z1">Zone 1 — Maadi</option>
+                <option value="z2">Zone 2 — Heliopolis</option>
+                <option value="z3">Zone 3 — Dokki</option>
+                <option value="z4">Zone 4 — Nasr City</option>
+                <option value="z5">Zone 5 — New Cairo</option>
+                <option value="z6">Zone 6 — Zamalek</option>
+              </select>
+            </div>
+          </div>
+          <input type="text" id="as-note" placeholder="Note: e.g. covering for sick colleague" style="margin-bottom:8px;font-size:13px"/>
+          <button class="btn btn-primary" onclick="applyAssign()" style="font-size:13px;padding:9px">Apply assignment</button>
+          <div id="assign-msg"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Weekly schedule</div>
+          <div class="sched-wrapper">
+            <table class="sched-table" id="sched-table">
+              <thead><tr>
+                <th style="text-align:left">Captain</th>
+                <th id="th0">Sun</th><th id="th1">Mon</th><th id="th2">Tue</th>
+                <th id="th3">Wed</th><th id="th4">Thu</th><th id="th5">Fri</th><th id="th6">Sat</th>
+              </tr></thead>
+              <tbody id="sched-body"></tbody>
+            </table>
+          </div>
+          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;font-size:11px;color:var(--text2)">
+            <span style="color:var(--purple)">● Morning</span>
+            <span style="color:var(--blue)">● Night</span>
+            <span style="color:var(--amber)">● Cover</span>
+            <span style="color:var(--text3)">● Off</span>
+            <span style="color:var(--orange)">● Cross-zone</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CAPTAINS -->
+      <div id="ct-captains" class="screen">
+
+        <!-- ADD CAPTAIN -->
+        <div class="card">
+          <div class="card-title">Add captain / إضافة كابتن</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="form-group" style="margin-bottom:8px;grid-column:1/-1">
+              <label class="form-label">Full name / الاسم بالكامل</label>
+              <input type="text" id="cap-name" placeholder="e.g. Ahmed Hassan" style="font-size:13px"/>
+            </div>
+            <div class="form-group" style="margin-bottom:8px">
+              <label class="form-label">Zone / المنطقة</label>
+              <select id="cap-zone" style="font-size:13px">
+                <option value="z1">Zone 1 — Maadi</option>
+                <option value="z2">Zone 2 — Heliopolis</option>
+                <option value="z3">Zone 3 — Dokki</option>
+                <option value="z4">Zone 4 — Nasr City</option>
+                <option value="z5">Zone 5 — New Cairo</option>
+                <option value="z6">Zone 6 — Zamalek</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:8px">
+              <label class="form-label">Base shift / الشيفت الأساسي</label>
+              <select id="cap-shift" style="font-size:13px">
+                <option value="morning">Morning / صباحي (9:00 AM)</option>
+                <option value="morning8">Morning early / مبكر (8:00 AM)</option>
+                <option value="night">Night / مسائي (4:00 PM)</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="addCaptain()" style="font-size:13px;padding:9px">Add captain / إضافة</button>
+          <div id="cap-add-msg"></div>
+        </div>
+
+        <!-- CAPTAIN LIST -->
+        <div class="card">
+          <div class="card-title">All captains / جميع الكباتن</div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:12px">Tap a captain to edit their name or zone.</div>
+          <div id="cap-list-render"></div>
+        </div>
+
+        <!-- EDIT PANEL (hidden until a captain is tapped) -->
+        <div id="cap-edit-panel" class="card" style="display:none;border-color:var(--orange)">
+          <div class="card-title" style="color:var(--orange)">Edit captain / تعديل</div>
+          <input type="hidden" id="cap-edit-id"/>
+          <div class="form-group">
+            <label class="form-label">Full name / الاسم</label>
+            <input type="text" id="cap-edit-name" style="font-size:13px"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Zone / المنطقة</label>
+            <select id="cap-edit-zone" style="font-size:13px">
+              <option value="z1">Zone 1 — Maadi</option>
+              <option value="z2">Zone 2 — Heliopolis</option>
+              <option value="z3">Zone 3 — Dokki</option>
+              <option value="z4">Zone 4 — Nasr City</option>
+              <option value="z5">Zone 5 — New Cairo</option>
+              <option value="z6">Zone 6 — Zamalek</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Base shift / الشيفت الأساسي</label>
+            <select id="cap-edit-shift" style="font-size:13px">
+              <option value="morning">Morning / صباحي (9:00 AM)</option>
+              <option value="morning8">Morning early / مبكر (8:00 AM)</option>
+              <option value="night">Night / مسائي (4:00 PM)</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="saveCaptainEdit()" style="font-size:13px;padding:9px;flex:1">Save changes / حفظ</button>
+            <button class="btn" onclick="document.getElementById('cap-edit-panel').style.display='none'" style="font-size:13px;padding:9px">Cancel</button>
+          </div>
+          <div id="cap-edit-msg"></div>
+        </div>
+
+        <!-- ZONE NAMES EDITOR -->
+        <div class="card">
+          <div class="card-title">Edit zone names / تعديل أسماء المناطق</div>
+          <div id="zone-name-editor"></div>
+          <button class="btn btn-primary" onclick="saveZoneNames()" style="font-size:13px;padding:9px;margin-top:8px">Save zone names / حفظ</button>
+          <div id="zone-name-msg"></div>
+        </div>
+
+      </div>
+
+      <!-- CONFLICTS -->
+      <div id="ct-conflicts" class="screen">
+        <div style="margin-bottom:12px;font-size:13px;color:var(--text2)">Auto-checks all zones for uncovered days.</div>
+        <div id="conflicts-body"></div>
+      </div>
+
+      <!-- USERS -->
+      <div id="ct-users" class="screen">
+        <div class="card">
+          <div class="card-title">Add new user / إضافة مستخدم</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="form-group" style="margin-bottom:8px">
+              <label class="form-label">Full name / الاسم</label>
+              <input type="text" id="u-name" placeholder="Ahmed Hassan" style="font-size:13px"/>
+            </div>
+            <div class="form-group" style="margin-bottom:8px">
+              <label class="form-label">Role / الدور</label>
+              <select id="u-role" style="font-size:13px">
+                <option value="rider">Captain / كابتن</option>
+                <option value="coordinator">Coordinator / منسق</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:8px">
+              <label class="form-label">Employee ID / رقم الموظف</label>
+              <input type="text" id="u-empid" placeholder="e.g. 10234" style="font-size:13px"/>
+            </div>
+            <div class="form-group" style="margin-bottom:8px">
+              <label class="form-label">Email <span>(optional)</span></label>
+              <input type="text" id="u-email" placeholder="ahmed@talabat.com" style="font-size:13px" autocapitalize="none"/>
+            </div>
+            <div class="form-group" style="margin-bottom:8px;grid-column:1/-1">
+              <label class="form-label">Password / كلمة المرور</label>
+              <input type="password" id="u-pass" placeholder="Set a password for this user" style="font-size:13px"/>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="addUser()" style="font-size:13px;padding:9px">Add user / إضافة</button>
+          <div id="user-add-msg"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Allowed users / المستخدمون المسموح لهم</div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:12px">Only these people can log in to the app.</div>
+          <div id="user-list-render"></div>
+        </div>
+      </div>
+
+      <!-- SETUP -->
+      <div id="ct-setup" class="screen">
+        <div class="setup-card">
+          <div style="font-family:var(--font-head);font-size:15px;font-weight:700;margin-bottom:4px;color:var(--orange)">🔗 Google Sheets Setup</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:16px">Do this once — takes about 5 minutes</div>
+          <div class="setup-step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Create a Google Sheet</div>
+              <div class="step-desc">Open <a href="https://sheets.google.com" target="_blank" style="color:var(--orange)">sheets.google.com</a> → click the big <b>+</b> to create a blank sheet. In the address bar you'll see a long URL — copy the part between <code>/d/</code> and <code>/edit</code>. That's your Sheet ID.</div>
+            </div>
+          </div>
+          <div class="setup-step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Open Apps Script</div>
+              <div class="step-desc">Inside your Sheet click <b>Extensions</b> in the top menu → <b>Apps Script</b>. A new tab opens with a code editor. Delete everything in it.</div>
+            </div>
+          </div>
+          <div class="setup-step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Paste the backend code</div>
+              <div class="step-desc">Open the <code>Code.gs</code> file from your download. Copy everything inside it. Paste it into the Apps Script editor. Find the line that says <code>YOUR_GOOGLE_SHEET_ID_HERE</code> and replace it with your real Sheet ID. Press <b>Ctrl+S</b> to save.</div>
+            </div>
+          </div>
+          <div class="setup-step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-title">Run setup once</div>
+              <div class="step-desc">In the function dropdown (shows "myFunction") select <b>setupSheets</b> then click the ▶ Run button. Accept any permission dialogs. This creates all the sheet tabs automatically.</div>
+            </div>
+          </div>
+          <div class="setup-step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <div class="step-title">Deploy as Web App</div>
+              <div class="step-desc">Click <b>Deploy</b> (top right) → <b>New deployment</b> → click the gear icon → choose <b>Web app</b>. Set <b>Execute as: Me</b>. Set <b>Who has access: Anyone</b>. Click <b>Deploy</b>. Copy the long URL that appears — that's your Web App URL.</div>
+            </div>
+          </div>
+          <div class="setup-step" style="margin-bottom:0">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <div class="step-title">Paste URL below and connect</div>
+              <div class="step-desc">Come back here, paste the Web App URL in the field below, and tap Connect. Done — all data now syncs to your Sheet.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="setup-card" style="margin-top:10px">
+          <div style="font-family:var(--font-head);font-size:15px;font-weight:700;margin-bottom:4px;color:var(--orange)">🌐 How to host this app (free)</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:16px">So riders can open it on their phones</div>
+          <div class="setup-step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Go to Netlify Drop</div>
+              <div class="step-desc">Open <a href="https://app.netlify.com/drop" target="_blank" style="color:var(--orange)">app.netlify.com/drop</a> in your browser. No account needed.</div>
+            </div>
+          </div>
+          <div class="setup-step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Find the app folder</div>
+              <div class="step-desc">Unzip the file you downloaded from Claude. Open the folder called <code>talabat-attendance</code> → then open the folder called <code>app</code>. You'll see 3 files inside: <code>index.html</code>, <code>manifest.json</code>, <code>sw.js</code>.</div>
+            </div>
+          </div>
+          <div class="setup-step" style="margin-bottom:0">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Drag the folder onto Netlify</div>
+              <div class="step-desc">Drag the entire <code>app</code> folder onto the Netlify Drop page. In a few seconds you get a free URL like <code>https://happy-name-123.netlify.app</code>. Share that link with your riders — they can open it in Chrome and tap <b>"Add to Home Screen"</b> to install it like an app.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top:10px">
+          <label class="form-label">Apps Script Web App URL</label>
+          <input type="text" id="gas-url" placeholder="https://script.google.com/macros/s/.../exec" autocapitalize="none"/>
+        </div>
+        <button class="btn btn-primary" onclick="saveConfig()">Connect & save</button>
+        <div id="config-msg"></div>
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+          <div style="font-size:12px;font-weight:500;margin-bottom:8px;color:var(--text2)">Current connection</div>
+          <div id="current-config" style="font-size:12px;color:var(--text3)">Not configured</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RIDER VIEW -->
+  <div id="rider-view" style="display:none">
+    <div class="content" style="padding-bottom:30px">
+      <div style="text-align:center;margin-bottom:20px;padding-top:6px">
+        <div style="font-size:12px;color:var(--text2)" id="rider-greeting">Good morning</div>
+        <div style="font-family:var(--font-head);font-size:20px;font-weight:800;margin-top:2px" id="rider-name-display">—</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Your shift today</div>
+        <div id="rider-today-shift" style="font-size:13px;color:var(--text2)">Loading...</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">GPS verification / التحقق من الموقع</div>
+        <div class="gps-grid">
+          <div class="gps-item"><div class="gps-item-label">Status</div><div class="gps-item-val" id="gps-status-val">—</div></div>
+          <div class="gps-item"><div class="gps-item-label">Mock GPS</div><div class="gps-item-val" id="gps-mock-val">—</div></div>
+          <div class="gps-item" style="grid-column:1/-1"><div class="gps-item-label">Coordinates</div><div class="gps-item-val" id="gps-coords-val" style="font-size:11px">—</div></div>
+          <div class="gps-item" style="grid-column:1/-1"><div class="gps-item-label">Zone match</div><div class="gps-item-val" id="gps-zone-val">—</div></div>
+        </div>
+        <button class="btn" onclick="detectGPS()" id="gps-btn">Detect my location / حدد موقعي</button>
+        <div id="gps-msg"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Selfie / صورة شخصية</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:8px">Clear photo showing your face and surroundings</div>
+        <div class="photo-zone" id="photo-zone" onclick="document.getElementById('photo-input').click()">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--text3)"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <div class="photo-zone-label">Tap to take photo / اضغط للتصوير</div>
+        </div>
+        <input type="file" id="photo-input" accept="image/*" capture="user" style="display:none" onchange="handlePhoto(event)"/>
+        <div id="photo-msg"></div>
+      </div>
+
+      <button class="btn btn-primary" style="font-size:15px;padding:14px;margin-bottom:16px" onclick="submitCheckin()">
+        Submit check-in / تسجيل الحضور
+      </button>
+      <div id="checkin-result"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ---- STATE ----
+let CONFIG = JSON.parse(localStorage.getItem('talabat_config') || '{"gasUrl":""}');
+let SESSION = {role:null, name:null, userId:null};
+let RIDERS = [], ZONES_DATA = [], scheduleData = {}, attendanceData = [];
+let gpsResult = null, photoData = null;
+
+// ---- USER WHITELIST (stored in localStorage, managed by coordinator) ----
+// Each user: {id, name, empId, email, password, role:'coordinator'|'rider'}
+function getUsers() {
+  const stored = localStorage.getItem('talabat_users');
+  if (stored) return JSON.parse(stored);
+  // Default: one coordinator so you can always get in
+  return [
+    {id:'u0', name:'Coordinator', empId:'admin', email:'admin', password:'admin1234', role:'coordinator'}
+  ];
+}
+function saveUsers(users) {
+  localStorage.setItem('talabat_users', JSON.stringify(users));
+}
+function findUser(loginId, password) {
+  const users = getUsers();
+  const id = loginId.trim().toLowerCase();
+  return users.find(u =>
+    (u.empId.toLowerCase() === id || u.email.toLowerCase() === id) &&
+    u.password === password
+  );
+}
+
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const DEFAULT_RIDERS = [
+  {ID:1,Name:'Ahmed Hassan',Zone:'z1',BaseShift:'morning'},
+  {ID:2,Name:'Mohamed Ali',Zone:'z1',BaseShift:'night'},
+  {ID:3,Name:'Omar Khaled',Zone:'z2',BaseShift:'morning'},
+  {ID:4,Name:'Karim Saad',Zone:'z2',BaseShift:'night'},
+  {ID:5,Name:'Youssef Nabil',Zone:'z3',BaseShift:'morning'},
+  {ID:6,Name:'Hassan Fathy',Zone:'z3',BaseShift:'night'},
+  {ID:7,Name:'Tarek Mostafa',Zone:'z4',BaseShift:'morning8'},
+  {ID:8,Name:'Amr Sayed',Zone:'z4',BaseShift:'night'},
+  {ID:9,Name:'Mahmoud Ibrahim',Zone:'z5',BaseShift:'morning'},
+  {ID:10,Name:'Adel Ramzy',Zone:'z5',BaseShift:'night'},
+  {ID:11,Name:'Sherif Wagdy',Zone:'z6',BaseShift:'morning'},
+  {ID:12,Name:'Walid Hamdy',Zone:'z6',BaseShift:'night'},
+];
+const DEFAULT_ZONES = [
+  {ID:'z1',Name:'Maadi',Lat:29.9602,Lng:31.2569,RadiusMeters:500},
+  {ID:'z2',Name:'Heliopolis',Lat:30.0869,Lng:31.3222,RadiusMeters:500},
+  {ID:'z3',Name:'Dokki',Lat:30.0380,Lng:31.2132,RadiusMeters:500},
+  {ID:'z4',Name:'Nasr City',Lat:30.0651,Lng:31.3430,RadiusMeters:500},
+  {ID:'z5',Name:'New Cairo',Lat:30.0274,Lng:31.4795,RadiusMeters:500},
+  {ID:'z6',Name:'Zamalek',Lat:30.0608,Lng:31.2212,RadiusMeters:500},
+];
+const OFF_DAYS = {1:0,2:3,3:1,4:4,5:2,6:5,7:3,8:0,9:4,10:1,11:5,12:2};
+
+// ---- API ----
+async function api(params) {
+  if (!CONFIG.gasUrl) return null;
+  try {
+    if (params.action && ['saveSchedule','saveAttendance','updateRider'].includes(params.action)) {
+      const r = await fetch(CONFIG.gasUrl, {method:'POST', body:JSON.stringify(params)});
+      return await r.json();
+    } else {
+      const url = new URL(CONFIG.gasUrl);
+      Object.entries(params).forEach(([k,v]) => url.searchParams.set(k,v));
+      const r = await fetch(url.toString());
+      return await r.json();
+    }
+  } catch(e) { return null; }
+}
+
+// ---- WEEK HELPERS ----
+function getCurrentWeek() {
+  const now = new Date();
+  const start = new Date(now);
+  start.setDate(now.getDate() - now.getDay());
+  return start.toISOString().split('T')[0];
+}
+function getWeekOptions() {
+  const weeks = [];
+  for (let i = -1; i <= 3; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - d.getDay() + i * 7);
+    const key = d.toISOString().split('T')[0];
+    const end = new Date(d); end.setDate(d.getDate()+6);
+    const fmt = (dt) => dt.toLocaleDateString('en-EG',{month:'short',day:'numeric'});
+    weeks.push({key, label: `${fmt(d)} – ${fmt(end)}${i===0?' (this week)':i===-1?' (last week)':''}`});
+  }
+  return weeks;
+}
+
+// ---- SCHEDULE LOGIC ----
+function defaultCell(rider, day) {
+  const offDay = OFF_DAYS[rider.ID];
+  const partner = RIDERS.find(r => r.Zone === rider.Zone && r.ID !== rider.ID);
+  const partOff = partner ? OFF_DAYS[partner.ID] : -1;
+  if (day === offDay) return {shift:'off', zone:rider.Zone};
+  if (day === partOff) return {shift:'cover', zone:rider.Zone};
+  return {shift:rider.BaseShift, zone:rider.Zone};
+}
+function getCell(riderId, day) {
+  const key = `${riderId}_${day}`;
+  if (scheduleData[key]) return scheduleData[key];
+  const r = RIDERS.find(x => x.ID == riderId);
+  if (!r) return {shift:'off', zone:'z1'};
+  return defaultCell(r, day);
+}
+
+// ---- LOGIN ----
+function doLogin() {
+  const loginId = document.getElementById('login-id').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  if (!loginId) { showMsg('login-msg','error','Enter your Employee ID or Email'); return; }
+  if (!pass) { showMsg('login-msg','error','Enter your password'); return; }
+  const user = findUser(loginId, pass);
+  if (!user) {
+    showMsg('login-msg','error','ID/email or password is wrong. Contact your coordinator. / الرقم أو كلمة المرور غلط.');
+    return;
+  }
+  SESSION = {role: user.role, name: user.name, userId: user.id};
+  localStorage.setItem('talabat_session', JSON.stringify(SESSION));
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  initApp();
+}
+function logout() {
+  SESSION = {role:null,name:null};
+  localStorage.removeItem('talabat_session');
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-pin').value = '';
+}
+
+// ---- INIT ----
+async function initApp() {
+  RIDERS = getCaptains(); // load from localStorage first
+  ZONES_DATA = DEFAULT_ZONES;
+  // Apply saved zone names
+  const zNames = getZoneNames();
+  ZONES_DATA.forEach(z => { if(zNames[z.ID]) z.Name = zNames[z.ID]; });
+  if (CONFIG.gasUrl) {
+    const rd = await api({action:'getRiders'});
+    if (rd && Array.isArray(rd)) { RIDERS = rd; saveCaptains(rd); }
+    const zd = await api({action:'getZones'});
+    if (zd && Array.isArray(zd)) ZONES_DATA = zd;
+    document.getElementById('live-dot').style.display = 'inline-block';
+  }
+  if (SESSION.role === 'coordinator') {
+    document.getElementById('coord-view').style.display = 'block';
+    document.getElementById('rider-view').style.display = 'none';
+    document.getElementById('mode-switcher').style.display = 'flex';
+    document.getElementById('nav-title').textContent = 'Dashboard';
+    populateWeekPicker();
+    populateRiderSelect();
+    loadAttendance();
+    loadSchedule();
+    showConfig();
+  } else {
+    setMode('captain');
+  }
+}
+
+function setMode(m) {
+  if (m === 'coordinator') {
+    document.getElementById('coord-view').style.display = 'block';
+    document.getElementById('rider-view').style.display = 'none';
+    document.getElementById('mode-coord').classList.add('active');
+    document.getElementById('mode-captain').classList.remove('active');
+    document.getElementById('nav-title').textContent = 'Dashboard';
+  } else {
+    document.getElementById('coord-view').style.display = 'none';
+    document.getElementById('rider-view').style.display = 'block';
+    document.getElementById('mode-coord').classList.remove('active');
+    document.getElementById('mode-captain').classList.add('active');
+    document.getElementById('nav-title').textContent = SESSION.name || 'Check-in';
+    initRiderView();
+  }
+}
+
+// ---- COORDINATOR TABS ----
+function switchCoordTab(t, el) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#coord-view .screen').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('ct-'+t).classList.add('active');
+  if (t === 'conflicts') renderConflicts();
+  if (t === 'users') renderUserList();
+  if (t === 'captains') { renderCaptainList(); renderZoneNameEditor(); }
+}
+
+// ---- CAPTAIN STORAGE ----
+function getCaptains() {
+  const s = localStorage.getItem('talabat_captains');
+  return s ? JSON.parse(s) : [...DEFAULT_RIDERS];
+}
+function saveCaptains(list) {
+  localStorage.setItem('talabat_captains', JSON.stringify(list));
+  RIDERS = list; // keep in-memory in sync
+}
+function getZoneNames() {
+  const s = localStorage.getItem('talabat_zone_names');
+  return s ? JSON.parse(s) : {z1:'Maadi',z2:'Heliopolis',z3:'Dokki',z4:'Nasr City',z5:'New Cairo',z6:'Zamalek'};
+}
+function saveZoneNamesData(obj) {
+  localStorage.setItem('talabat_zone_names', JSON.stringify(obj));
+  // Sync into ZONES_DATA names
+  ZONES_DATA.forEach(z => { if(obj[z.ID]) z.Name = obj[z.ID]; });
+}
+
+function addCaptain() {
+  const name = document.getElementById('cap-name').value.trim();
+  const zone = document.getElementById('cap-zone').value;
+  const shift = document.getElementById('cap-shift').value;
+  if (!name) { showMsg('cap-add-msg','error','Enter captain name / أدخل الاسم'); return; }
+  const captains = getCaptains();
+  const newId = captains.length ? Math.max(...captains.map(c=>c.ID)) + 1 : 1;
+  captains.push({ID: newId, Name: name, Zone: zone, BaseShift: shift, Active: true});
+  saveCaptains(captains);
+  document.getElementById('cap-name').value = '';
+  showMsg('cap-add-msg','success',`${name} added as captain in ${zoneName(zone)}`);
+  renderCaptainList();
+  populateRiderSelect();
+}
+
+function editCaptain(id) {
+  const captains = getCaptains();
+  const c = captains.find(x => x.ID === id);
+  if (!c) return;
+  document.getElementById('cap-edit-id').value = id;
+  document.getElementById('cap-edit-name').value = c.Name;
+  document.getElementById('cap-edit-zone').value = c.Zone;
+  document.getElementById('cap-edit-shift').value = c.BaseShift;
+  document.getElementById('cap-edit-panel').style.display = 'block';
+  document.getElementById('cap-edit-panel').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function saveCaptainEdit() {
+  const id = parseInt(document.getElementById('cap-edit-id').value);
+  const name = document.getElementById('cap-edit-name').value.trim();
+  const zone = document.getElementById('cap-edit-zone').value;
+  const shift = document.getElementById('cap-edit-shift').value;
+  if (!name) { showMsg('cap-edit-msg','error','Name cannot be empty'); return; }
+  const captains = getCaptains();
+  const c = captains.find(x => x.ID === id);
+  if (!c) return;
+  c.Name = name; c.Zone = zone; c.BaseShift = shift;
+  saveCaptains(captains);
+  document.getElementById('cap-edit-panel').style.display = 'none';
+  showMsg('cap-add-msg','success',`${name} updated`);
+  renderCaptainList();
+  populateRiderSelect();
+  renderDashboard(currentFilter);
+}
+
+function deleteCaptain(id) {
+  if (!confirm('Remove this captain?')) return;
+  const captains = getCaptains().filter(c => c.ID !== id);
+  saveCaptains(captains);
+  renderCaptainList();
+  populateRiderSelect();
+  renderDashboard(currentFilter);
+}
+
+function renderCaptainList() {
+  const captains = getCaptains();
+  const el = document.getElementById('cap-list-render');
+  if (!el) return;
+  const zNames = getZoneNames();
+  if (!captains.length) { el.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0">No captains yet. Add one above.</div>'; return; }
+
+  // Group by zone
+  const zones = ['z1','z2','z3','z4','z5','z6'];
+  el.innerHTML = zones.map(zid => {
+    const zCaps = captains.filter(c => c.Zone === zid);
+    if (!zCaps.length) return '';
+    return `<div style="margin-bottom:14px">
+      <div style="font-size:11px;font-weight:600;color:var(--orange);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">${zNames[zid]||zid}</div>
+      ${zCaps.map(c => {
+        const shiftColor = {morning:'var(--purple)',morning8:'var(--purple)',night:'var(--blue)'}[c.BaseShift]||'var(--text2)';
+        const shiftLbl = {morning:'Morning 9AM',morning8:'Morning 8AM',night:'Night 4PM'}[c.BaseShift]||c.BaseShift;
+        return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+          <div class="av ${c.BaseShift.includes('morning')?'av-m':'av-n'}">${initials(c.Name)}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:500">${c.Name}</div>
+            <div style="font-size:11px;color:${shiftColor}">${shiftLbl}</div>
+          </div>
+          <div style="display:flex;gap:5px;flex-shrink:0">
+            <button class="btn btn-sm" onclick="editCaptain(${c.ID})" style="font-size:11px;padding:4px 10px">Edit</button>
+            <button class="btn btn-sm" onclick="deleteCaptain(${c.ID})" style="font-size:11px;padding:4px 8px;color:var(--red)">✕</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+
+function renderZoneNameEditor() {
+  const el = document.getElementById('zone-name-editor');
+  if (!el) return;
+  const names = getZoneNames();
+  const zones = ['z1','z2','z3','z4','z5','z6'];
+  el.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">` +
+    zones.map(z => `
+      <div>
+        <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:3px">${z.toUpperCase()}</label>
+        <input type="text" id="zname-${z}" value="${names[z]||''}" style="font-size:13px;padding:7px 10px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);width:100%;outline:none"/>
+      </div>`).join('') + `</div>`;
+}
+
+function saveZoneNames() {
+  const zones = ['z1','z2','z3','z4','z5','z6'];
+  const obj = {};
+  zones.forEach(z => { obj[z] = document.getElementById('zname-'+z).value.trim() || z; });
+  saveZoneNamesData(obj);
+  // Rebuild zone dropdowns in schedule
+  document.querySelectorAll('#as-zone option, #cap-zone option, #cap-edit-zone option').forEach(opt => {
+    const zid = opt.value;
+    if (obj[zid]) opt.textContent = `${zid.toUpperCase()} — ${obj[zid]}`;
+  });
+  showMsg('zone-name-msg','success','Zone names saved ✓');
+  renderCaptainList();
+}
+
+// ---- ATTENDANCE ----
+async function loadAttendance() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('today-label').textContent = new Date().toLocaleDateString('en-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  attendanceData = [];
+  if (CONFIG.gasUrl) {
+    const d = await api({action:'getAttendance', date:today});
+    if (d && Array.isArray(d)) attendanceData = d;
+  }
+  renderDashboard();
+}
+
+function computeStatus(rider, checkinTime, shift) {
+  if (!checkinTime || checkinTime === '—') return 'absent';
+  const shiftMins = {morning:9*60, morning8:8*60, night:16*60, cover:12*60};
+  const scheduled = shiftMins[shift] || 9*60;
+  const [h,m] = checkinTime.split(':').map(Number);
+  const actual = h*60+m;
+  return (actual - scheduled) <= 30 ? 'on-time' : 'late';
+}
+
+function renderDashboard(filter='all') {
+  const today = new Date().getDay();
+  const todayRiders = RIDERS.map(r => {
+    const cell = getCell(r.ID, today);
+    const att = attendanceData.find(a => a.RiderID == r.ID);
+    const checkin = att ? att.CheckinTime : null;
+    let status;
+    if (cell.shift === 'off') status = 'off';
+    else if (!checkin) status = 'absent';
+    else status = computeStatus(r, checkin, cell.shift);
+    return {...r, cell, checkin, status};
+  });
+
+  const present = todayRiders.filter(r => r.status === 'on-time' || r.status === 'late').length;
+  const late = todayRiders.filter(r => r.status === 'late').length;
+  const absent = todayRiders.filter(r => r.status === 'absent').length;
+  const off = todayRiders.filter(r => r.status === 'off').length;
+  const total = RIDERS.length;
+
+  document.getElementById('s-present').textContent = present;
+  document.getElementById('s-late').textContent = late;
+  document.getElementById('s-absent').textContent = absent;
+  document.getElementById('s-off').textContent = off;
+  const pct = Math.round((present / (total - off)) * 100) || 0;
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-label').textContent = `${present} of ${total - off} riders checked in (${pct}%)`;
+
+  const filtered = filter === 'all' ? todayRiders : todayRiders.filter(r => r.status === filter);
+  const list = document.getElementById('rider-list');
+  if (!filtered.length) { list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text3);font-size:13px">No riders</div>'; return; }
+  list.innerHTML = filtered.map(r => {
+    const statusBadge = {
+      'on-time': '<span class="badge b-green">On time</span>',
+      'late': '<span class="badge b-amber">Late</span>',
+      'absent': '<span class="badge b-red">Absent</span>',
+      'off': '<span class="badge b-gray">Day off</span>',
+    }[r.status];
+    const shiftBadge = {morning:'<span class="badge b-purple">Morning</span>',morning8:'<span class="badge b-purple">8AM</span>',night:'<span class="badge b-blue">Night</span>',cover:'<span class="badge b-orange">Cover</span>',off:''}[r.cell.shift]||'';
+    const crossZone = r.cell.zone !== r.Zone ? `<span class="badge b-orange" style="margin-left:3px">→ ${zoneName(r.cell.zone)}</span>` : '';
+    const avClass = r.BaseShift.includes('morning') ? 'av-m' : 'av-n';
+    return `<div class="rider-row">
+      <div class="av ${avClass}">${initials(r.Name)}</div>
+      <div class="r-info">
+        <div class="r-name">${r.Name}</div>
+        <div class="r-meta">${zoneName(r.Zone)} ${shiftBadge}${crossZone}</div>
+      </div>
+      <div class="r-right">
+        ${statusBadge}
+        <div class="r-time">${r.checkin || '—'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+let currentFilter = 'all';
+function filterList(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderDashboard(f);
+}
+
+// ---- SCHEDULE ----
+function populateWeekPicker() {
+  const sel = document.getElementById('week-picker');
+  sel.innerHTML = getWeekOptions().map(w => `<option value="${w.key}">${w.label}</option>`).join('');
+  sel.value = getCurrentWeek();
+}
+function populateRiderSelect() {
+  document.getElementById('as-rider').innerHTML = RIDERS.map(r => `<option value="${r.ID}">${r.Name} (${zoneName(r.Zone)})</option>`).join('');
+}
+
+async function loadSchedule() {
+  const week = document.getElementById('week-picker').value;
+  scheduleData = {};
+  if (CONFIG.gasUrl) {
+    const d = await api({action:'getSchedule', week});
+    if (d && Array.isArray(d)) {
+      d.forEach(row => { scheduleData[`${row.RiderID}_${row.Day}`] = {shift:row.Shift, zone:row.Zone, note:row.Note}; });
+    }
+  }
+  renderScheduleTable();
+  renderConflicts();
+}
+
+function renderScheduleTable() {
+  const today = new Date().getDay();
+  DAYS.forEach((d,i) => {
+    const th = document.getElementById('th'+i);
+    if (th) { th.textContent = d + (i===today?' ●':''); if(i===today) th.style.color='var(--orange)'; }
+  });
+  const tbody = document.getElementById('sched-body');
+  tbody.innerHTML = RIDERS.map(r => {
+    return `<tr>
+      <td title="${r.Name}">${r.Name.split(' ')[0]}<div style="font-size:10px;color:var(--text3)">${zoneName(r.Zone)}</div></td>
+      ${DAYS.map((d,i) => {
+        const cell = getCell(r.ID, i);
+        const cross = cell.zone !== r.Zone;
+        const shiftColor = {morning:'var(--purple)',morning8:'var(--purple)',night:'var(--blue)',cover:'var(--amber)',off:'var(--text3)'}[cell.shift]||'var(--text2)';
+        const todayCls = i===today ? 'today-col' : '';
+        return `<td class="${todayCls}">
+          <select class="day-cell-select" 
+            style="color:${cross?'var(--orange)':shiftColor}"
+            onchange="updateCell(${r.ID},${i},this.value,'shift')"
+            data-rider="${r.ID}" data-day="${i}" data-field="shift">
+            <option value="morning" ${cell.shift==='morning'?'selected':''}>Morn</option>
+            <option value="morning8" ${cell.shift==='morning8'?'selected':''}>8AM</option>
+            <option value="night" ${cell.shift==='night'?'selected':''}>Night</option>
+            <option value="cover" ${cell.shift==='cover'?'selected':''}>Cover</option>
+            <option value="off" ${cell.shift==='off'?'selected':''}>Off</option>
+          </select>
+          <select class="day-cell-select" 
+            style="margin-top:2px;font-size:10px;color:${cross?'var(--orange)':'var(--text3)'}"
+            onchange="updateCell(${r.ID},${i},this.value,'zone')"
+            data-rider="${r.ID}" data-day="${i}" data-field="zone">
+            <option value="z1" ${cell.zone==='z1'?'selected':''}>Z1</option>
+            <option value="z2" ${cell.zone==='z2'?'selected':''}>Z2</option>
+            <option value="z3" ${cell.zone==='z3'?'selected':''}>Z3</option>
+            <option value="z4" ${cell.zone==='z4'?'selected':''}>Z4</option>
+            <option value="z5" ${cell.zone==='z5'?'selected':''}>Z5</option>
+            <option value="z6" ${cell.zone==='z6'?'selected':''}>Z6</option>
+          </select>
+        </td>`;
+      }).join('')}
+    </tr>`;
+  }).join('');
+}
+
+function updateCell(riderId, day, val, field) {
+  const key = `${riderId}_${day}`;
+  if (!scheduleData[key]) {
+    const r = RIDERS.find(x=>x.ID==riderId);
+    scheduleData[key] = r ? {...defaultCell(r,day)} : {shift:'off',zone:'z1'};
+  }
+  scheduleData[key][field] = val;
+  renderScheduleTable();
+  renderConflicts();
+}
+
+async function saveSchedule() {
+  const week = document.getElementById('week-picker').value;
+  const entries = Object.entries(scheduleData).map(([key, cell]) => {
+    const [riderId, day] = key.split('_');
+    return {week, riderId:parseInt(riderId), day:parseInt(day), shift:cell.shift, zone:cell.zone, note:cell.note||'', updatedBy:SESSION.name};
+  });
+  if (!entries.length) { showMsg('assign-msg','warn','No changes to save'); return; }
+  if (CONFIG.gasUrl) {
+    const r = await api({action:'saveSchedule', data:entries});
+    if (r && r.ok) showMsg('assign-msg','success',`Saved ${r.saved} entries to Google Sheets`);
+    else showMsg('assign-msg','warn','Saved locally (not connected to Sheets)');
+  } else {
+    showMsg('assign-msg','warn','Config missing — changes saved locally only');
+  }
+}
+
+function applyAssign() {
+  const rid = parseInt(document.getElementById('as-rider').value);
+  const day = parseInt(document.getElementById('as-day').value);
+  const shift = document.getElementById('as-shift').value;
+  const zone = document.getElementById('as-zone').value;
+  const note = document.getElementById('as-note').value;
+  const r = RIDERS.find(x => x.ID === rid);
+  const key = `${rid}_${day}`;
+  scheduleData[key] = {shift, zone: zone || r.Zone, note};
+  renderScheduleTable();
+  renderConflicts();
+  const crossZone = zone && zone !== r.Zone;
+  showMsg('assign-msg','success',`${r.Name} — ${DAYS[day]}: ${shift}${crossZone?' → '+zoneName(zone):''} applied`);
+}
+
+// ---- CONFLICTS ----
+function renderConflicts() {
+  const issues = [];
+  const ZONE_IDS = ['z1','z2','z3','z4','z5','z6'];
+  const today = new Date().getDay();
+  ZONE_IDS.forEach(zid => {
+    const zr = RIDERS.filter(r => r.Zone === zid);
+    for (let d=0; d<7; d++) {
+      const activeInZone = zr.filter(r => {
+        const cell = getCell(r.ID, d);
+        return cell.shift !== 'off' && cell.zone === zid;
+      });
+      if (!activeInZone.length) {
+        issues.push({day:d, zone:zid, msg:`${zoneName(zid)} — ${DAYS[d]}: No rider assigned`, today:d===today});
+      }
+    }
+  });
+  const el = document.getElementById('conflicts-body');
+  if (!el) return;
+  if (!issues.length) {
+    el.innerHTML = '<div class="alert alert-success">✓ No conflicts — all zones covered every day</div>';
+  } else {
+    el.innerHTML = issues.sort((a,b)=>b.today-a.today).map(i => `
+      <div class="conflict-item">
+        <span style="color:var(--red);font-size:16px;flex-shrink:0">⚠</span>
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--red)">${i.msg}</div>
+          ${i.today?'<div style="font-size:11px;color:var(--text3);margin-top:2px">TODAY — needs immediate action</div>':''}
+        </div>
+      </div>`).join('');
+  }
+}
+
+// ---- RIDER VIEW ----
+function initRiderView() {
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning / صباح الخير' : hour < 17 ? 'Good afternoon / مساء الخير' : 'Good evening / مساء النور';
+  document.getElementById('rider-greeting').textContent = greeting;
+  document.getElementById('rider-name-display').textContent = SESSION.name;
+  gpsResult = null; photoData = null;
+  document.getElementById('photo-zone').innerHTML = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--text3)"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><div class="photo-zone-label">Tap to take photo</div>`;
+  document.getElementById('photo-msg').innerHTML = '';
+  document.getElementById('gps-msg').innerHTML = '';
+  document.getElementById('checkin-result').innerHTML = '';
+  const rider = RIDERS.find(r => r.Name.toLowerCase().includes(SESSION.name.toLowerCase().split(' ')[0]));
+  if (rider) {
+    const today = new Date().getDay();
+    const cell = getCell(rider.ID, today);
+    const shiftLabel = {morning:'Morning shift — 9:00 AM',morning8:'Morning shift — 8:00 AM',night:'Night shift — 4:00 PM',cover:'Cover shift — 12:00 PM to 12:00 AM',off:'Day off today'}[cell.shift]||cell.shift;
+    const crossZone = cell.zone !== rider.Zone ? ` (covering ${zoneName(cell.zone)})` : '';
+    document.getElementById('rider-today-shift').innerHTML = `<div style="font-size:16px;font-weight:500;color:var(--text)">${shiftLabel}${crossZone}</div><div style="font-size:12px;color:var(--text3);margin-top:4px">Zone: ${zoneName(cell.zone)}</div>`;
+  } else {
+    document.getElementById('rider-today-shift').textContent = 'Captain not found in system. Contact your coordinator.';
+  }
+}
+
+// ---- GPS ----
+function detectGPS() {
+  if (!navigator.geolocation) { showMsg('gps-msg','error','GPS not available on this device'); return; }
+  document.getElementById('gps-status-val').textContent = 'Detecting...';
+  document.getElementById('gps-btn').textContent = 'Detecting...';
+  navigator.geolocation.getCurrentPosition(pos => {
+    const {latitude:lat, longitude:lng, accuracy} = pos.coords;
+    document.getElementById('gps-coords-val').textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)} (±${Math.round(accuracy)}m)`;
+    const isMock = accuracy < 2;
+    document.getElementById('gps-mock-val').innerHTML = isMock ? '<span style="color:var(--red)">Possible fake GPS</span>' : '<span style="color:var(--green)">Real GPS ✓</span>';
+    if (isMock) {
+      document.getElementById('gps-status-val').innerHTML = '<span style="color:var(--red)">Rejected</span>';
+      showMsg('gps-msg','error','Fake GPS detected. Disable any mock location app. / تم اكتشاف GPS مزيف. أوقف تطبيق التزوير.');
+      gpsResult = null;
+    } else {
+      const rider = RIDERS.find(r => r.Name.toLowerCase().includes(SESSION.name.toLowerCase().split(' ')[0]));
+      const today = new Date().getDay();
+      const assignedZone = rider ? getCell(rider.ID, today).zone : null;
+      const zone = assignedZone ? ZONES_DATA.find(z => z.ID === assignedZone) : null;
+      let inZone = true;
+      if (zone && zone.Lat && zone.Lng) {
+        const dist = haversine(lat, lng, parseFloat(zone.Lat), parseFloat(zone.Lng));
+        inZone = dist <= (zone.RadiusMeters || 500);
+        document.getElementById('gps-zone-val').innerHTML = inZone ? `<span style="color:var(--green)">Inside ${zone.Name} ✓</span>` : `<span style="color:var(--amber)">Outside zone (${Math.round(dist)}m away)</span>`;
+      } else {
+        document.getElementById('gps-zone-val').textContent = 'Zone check unavailable';
+      }
+      if (!inZone) {
+        document.getElementById('gps-status-val').innerHTML = '<span style="color:var(--amber)">Outside zone</span>';
+        showMsg('gps-msg','warn','You are outside your assigned zone. Please move to your zone. / أنت خارج المنطقة المحددة.');
+        gpsResult = null;
+      } else {
+        document.getElementById('gps-status-val').innerHTML = '<span style="color:var(--green)">Verified ✓</span>';
+        showMsg('gps-msg','success','Location verified inside your zone / تم التحقق من موقعك بنجاح');
+        gpsResult = {lat, lng, accuracy};
+      }
+    }
+    document.getElementById('gps-btn').textContent = 'Detect my location / حدد موقعي';
+  }, err => {
+    document.getElementById('gps-status-val').innerHTML = '<span style="color:var(--red)">Failed</span>';
+    showMsg('gps-msg','error','Could not get location. Allow GPS access. / يرجى السماح بالوصول إلى الموقع.');
+    document.getElementById('gps-btn').textContent = 'Detect my location / حدد موقعي';
+  }, {enableHighAccuracy:true, timeout:12000});
+}
+
+function haversine(lat1,lon1,lat2,lon2) {
+  const R=6371000, dLat=(lat2-lat1)*Math.PI/180, dLon=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+// ---- PHOTO ----
+function handlePhoto(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    photoData = ev.target.result;
+    document.getElementById('photo-zone').innerHTML = `<img src="${photoData}" alt="Selfie"/>`;
+    showMsg('photo-msg','success','Photo captured / تم التقاط الصورة');
+  };
+  reader.readAsDataURL(file);
+}
+
+// ---- CHECK-IN ----
+async function submitCheckin() {
+  if (!gpsResult) { showMsg('checkin-result','error','GPS not verified yet / لم يتم التحقق من الموقع'); return; }
+  if (!photoData) { showMsg('checkin-result','error','Please take a selfie / يرجى التقاط صورة'); return; }
+  const now = new Date();
+  const time = now.toTimeString().slice(0,5);
+  const date = now.toISOString().split('T')[0];
+  const rider = RIDERS.find(r => r.Name.toLowerCase().includes(SESSION.name.toLowerCase().split(' ')[0]));
+  if (!rider) { showMsg('checkin-result','error','Captain not found in system'); return; }
+  const today = now.getDay();
+  const cell = getCell(rider.ID, today);
+  const shiftMins = {morning:9*60, morning8:8*60, night:16*60, cover:12*60};
+  const scheduled = shiftMins[cell.shift] || 9*60;
+  const actual = now.getHours()*60+now.getMinutes();
+  const diff = actual - scheduled;
+  const status = diff <= 30 ? 'on-time' : 'late';
+  const data = {
+    date, riderId:rider.ID, riderName:rider.Name, zone:cell.zone,
+    shift:cell.shift, checkinTime:time, status,
+    lat:gpsResult.lat, lng:gpsResult.lng, accuracy:gpsResult.accuracy,
+    photoUrl:'[photo_attached]', note:''
+  };
+  if (CONFIG.gasUrl) await api({action:'saveAttendance', data});
+  const statusTxt = status === 'on-time'
+    ? 'On time ✓ / في الوقت'
+    : `Late by ${diff-30} min / متأخر ${diff-30} دقيقة`;
+  showMsg('checkin-result','success',`Check-in recorded at ${time} — ${statusTxt}`);
+}
+
+// ---- USERS TAB ----
+function addUser() {
+  const name = document.getElementById('u-name').value.trim();
+  const role = document.getElementById('u-role').value;
+  const empId = document.getElementById('u-empid').value.trim();
+  const email = document.getElementById('u-email').value.trim().toLowerCase();
+  const pass = document.getElementById('u-pass').value;
+  if (!name || !empId || !pass) { showMsg('user-add-msg','error','Name, Employee ID and Password are required'); return; }
+  const users = getUsers();
+  if (users.find(u => u.empId.toLowerCase() === empId.toLowerCase())) {
+    showMsg('user-add-msg','error','Employee ID already exists');
+    return;
+  }
+  const newUser = {id:'u'+Date.now(), name, empId, email: email||empId, password: pass, role};
+  users.push(newUser);
+  saveUsers(users);
+  document.getElementById('u-name').value='';
+  document.getElementById('u-empid').value='';
+  document.getElementById('u-email').value='';
+  document.getElementById('u-pass').value='';
+  showMsg('user-add-msg','success',`${name} added as ${role}`);
+  renderUserList();
+}
+function deleteUser(id) {
+  const users = getUsers().filter(u => u.id !== id);
+  saveUsers(users);
+  renderUserList();
+}
+function resetPassword(id) {
+  const newPass = prompt('Enter new password for this user:');
+  if (!newPass) return;
+  const users = getUsers();
+  const u = users.find(x => x.id === id);
+  if (u) { u.password = newPass; saveUsers(users); showMsg('user-add-msg','success','Password updated'); }
+}
+function renderUserList() {
+  const users = getUsers();
+  const el = document.getElementById('user-list-render');
+  if (!el) return;
+  if (!users.length) { el.innerHTML = '<div style="color:var(--text3);font-size:13px">No users yet</div>'; return; }
+  el.innerHTML = users.map(u => `
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
+      <div class="av ${u.role==='coordinator'?'av-m':'av-n'}" style="font-size:11px">${initials(u.name)}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:500">${u.name}</div>
+        <div style="font-size:11px;color:var(--text3)">ID: ${u.empId}${u.email&&u.email!==u.empId?' · '+u.email:''} · <span class="badge ${u.role==='coordinator'?'b-purple':'b-blue'}" style="font-size:10px">${u.role}</span></div>
+      </div>
+      <div style="display:flex;gap:5px;flex-shrink:0">
+        <button class="btn btn-sm" onclick="resetPassword('${u.id}')" style="font-size:11px;padding:4px 8px">🔑</button>
+        ${u.id==='u0'?'':'<button class="btn btn-sm" onclick="deleteUser(\''+u.id+'\')" style="font-size:11px;padding:4px 8px;color:var(--red)">✕</button>'}
+      </div>
+    </div>`).join('');
+}
+
+// ---- SETUP ----
+function saveConfig() {
+  const url = document.getElementById('gas-url').value.trim();
+  if (url) CONFIG.gasUrl = url;
+  localStorage.setItem('talabat_config', JSON.stringify(CONFIG));
+  showMsg('config-msg','success','Configuration saved ✓');
+  showConfig();
+  document.getElementById('live-dot').style.display = CONFIG.gasUrl ? 'inline-block' : 'none';
+}
+function showConfig() {
+  const el = document.getElementById('current-config');
+  if (!el) return;
+  if (document.getElementById('gas-url')) document.getElementById('gas-url').value = CONFIG.gasUrl || '';
+  el.textContent = CONFIG.gasUrl ? `Connected: ${CONFIG.gasUrl.slice(0,50)}...` : 'Not connected to Google Sheets';
+  el.style.color = CONFIG.gasUrl ? 'var(--green)' : 'var(--text3)';
+}
+
+// ---- HELPERS ----
+function initials(n) { return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+function zoneName(id) {
+  const names = getZoneNames();
+  if (names[id]) return names[id];
+  const z = ZONES_DATA.find(z => z.ID === id);
+  return z ? z.Name : id;
+}
+function showMsg(id, type, msg) {
+  const cls = {success:'alert-success',warn:'alert-warn',error:'alert-error',info:'alert-info'}[type]||'alert-info';
+  document.getElementById(id).innerHTML = `<div class="alert ${cls}">${msg}</div>`;
+  if (type === 'success') setTimeout(()=>{const el=document.getElementById(id);if(el)el.innerHTML='';}, 3500);
+}
+
+// ---- AUTO-LOGIN from saved session ----
+const savedSession = JSON.parse(localStorage.getItem('talabat_session')||'null');
+if (savedSession && savedSession.name && savedSession.userId) {
+  // Verify user still exists in whitelist
+  const users = getUsers();
+  const stillValid = users.find(u => u.id === savedSession.userId);
+  if (stillValid) {
+    SESSION = savedSession;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    initApp();
+  }
+}
+
+// ---- PWA SERVICE WORKER REGISTRATION ----
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
